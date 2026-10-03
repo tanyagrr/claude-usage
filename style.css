@@ -78,6 +78,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { margin: 0; }
 body {
   background: var(--page);
@@ -97,6 +98,14 @@ h2 { font-size: 16px; margin: 0; font-weight: 600; }
   border-radius: 8px; width: 36px; height: 36px; font-size: 16px; cursor: pointer;
 }
 .ghost:hover { background: var(--wash); }
+.ghost:disabled { cursor: progress; opacity: 0.7; }
+.ghost.wide { width: auto; padding: 0 12px; font: inherit; font-size: 13px; font-weight: 600; color: var(--text-primary); display: inline-flex; align-items: center; gap: 6px; }
+.actions { display: flex; gap: 8px; flex-shrink: 0; }
+.icon { display: inline-block; }
+.spinning .icon { animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinning .icon { animation: none; } }
+.status { color: var(--text-primary); font-size: 13px; margin: 6px 0 0; }
 
 .card {
   background: var(--surface-1);

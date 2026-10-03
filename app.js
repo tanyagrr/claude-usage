@@ -301,10 +301,12 @@
       </div>`;
     }).join("");
     const x = limits.extraUsage;
+    $("extra").hidden = !x;
     if (x) {
-      $("limits").insertAdjacentHTML("afterend", `<div class="extra">Extra usage: ${x.enabled
-        ? `on · ${x.currency === "USD" ? "$" : ""}${x.spent} of ${x.currency === "USD" ? "$" : ""}${x.monthlyLimit} monthly cap spent (${x.percentUsed}%)`
-        : "off"}</div>`);
+      const cur = x.currency === "USD" ? "$" : "";
+      $("extra").textContent = `Extra usage: ${x.enabled
+        ? (x.spent != null ? `on · ${cur}${x.spent} of ${cur}${x.monthlyLimit} monthly cap spent (${x.percentUsed}%)` : `on · ${x.percentUsed}% of monthly cap spent`)
+        : "off"}`;
     }
   }
 
@@ -332,22 +334,18 @@
     });
   }
 
-  async function main() {
-    initTheme();
-    fetch("data/limits.json", { cache: "no-cache" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then(renderLimits)
-      .catch(() => {});
-    try {
-      data = await (await fetch("data/usage.json", { cache: "no-cache" })).json();
-    } catch {
-      $("sub").textContent = "Could not load data/usage.json.";
-      return;
-    }
+  // ---------- loading & rendering ----------
+  const getJSON = (url) => fetch(url, { cache: "no-cache" }).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
+
+  async function load(base = "") {
+    const [usage, limits] = await Promise.all([
+      getJSON(base + "data/usage.json"),
+      getJSON(base + "data/limits.json").catch(() => null),
+    ]);
+    data = usage;
+    renderLimits(limits);
     if (!data.range) { $("sub").textContent = "No usage recorded yet."; return; }
     modelKeys = groupModels();
-    bindSeg("metricSeg", "metric");
-    bindSeg("rangeSeg", "range");
     renderSummary();
     renderLegend();
     renderDaily();
@@ -355,8 +353,73 @@
     renderModels();
     renderHeat();
     renderTable();
+  }
+
+  // ---------- on-demand refresh ----------
+  // The Refresh button rings a doorbell on a public ntfy.sh topic. A helper on my PC
+  // (scripts/helper.mjs) hears it, re-collects usage and limits, pushes them to GitHub,
+  // and replies with the commit sha; the page then loads that exact commit's data.
+  const setStatus = (text) => { $("status").textContent = text; $("status").hidden = !text; };
+
+  function refresh(cfg) {
+    const btn = $("refresh");
+    btn.disabled = true;
+    btn.classList.add("spinning");
+    setStatus("Asking my computer for fresh data…");
+    const since = Math.floor(Date.now() / 1000) - 1;
+    const es = new EventSource(`${cfg.relay}/${cfg.topic}/sse?since=${since}`);
+    let acked = false;
+    const finish = (text) => {
+      es.close();
+      clearTimeout(noAck);
+      clearTimeout(noDone);
+      btn.disabled = false;
+      btn.classList.remove("spinning");
+      setStatus(text);
+    };
+    const noAck = setTimeout(() => !acked && finish("My computer looks offline right now, so this is the latest saved data."), 12000);
+    const noDone = setTimeout(() => finish("Refresh is taking too long. Showing the latest saved data."), 90000);
+
+    es.onmessage = async (e) => {
+      let body;
+      try { body = JSON.parse(e.data).message || ""; } catch { return; }
+      if (body === "ack") { acked = true; setStatus("Collecting fresh numbers…"); return; }
+      if (body.startsWith("error")) return finish("My computer couldn't refresh the data. Showing the latest saved data.");
+      const m = /^done ([0-9a-f]{40})$/.exec(body);
+      if (!m) return;
+      try {
+        await load(`https://raw.githubusercontent.com/${cfg.repo}/${m[1]}/`);
+        finish("Fresh data loaded.");
+      } catch {
+        finish("Fresh data was saved but couldn't be loaded. Try reloading the page in a minute.");
+      }
+    };
+    let sent = false;
+    es.onopen = () => {
+      if (sent) return; // EventSource reconnects re-fire onopen
+      sent = true;
+      fetch(`${cfg.relay}/${cfg.topic}`, { method: "POST", body: "refresh" })
+        .catch(() => finish("Couldn't reach the refresh service. Showing the latest saved data."));
+    };
+  }
+
+  async function main() {
+    initTheme();
+    bindSeg("metricSeg", "metric");
+    bindSeg("rangeSeg", "range");
+    try {
+      await load();
+    } catch {
+      $("sub").textContent = "Could not load data/usage.json.";
+    }
+    getJSON("config.json").then((cfg) => {
+      if (!cfg.topic) return;
+      $("refresh").hidden = false;
+      $("refresh").addEventListener("click", () => refresh(cfg));
+    }).catch(() => {});
     let raf;
     addEventListener("resize", () => {
+      if (!data?.range) return;
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => { renderDaily(); renderHeat(); });
     });

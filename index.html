@@ -14,8 +14,12 @@
     <div>
       <h1>Claude usage</h1>
       <p class="sub" id="sub">Loading…</p>
+      <p class="status" id="status" role="status" hidden></p>
     </div>
-    <button id="theme" class="ghost" type="button" aria-label="Toggle dark mode">◐</button>
+    <div class="actions">
+      <button id="refresh" class="ghost wide" type="button" hidden><span class="icon" aria-hidden="true">↻</span> Refresh</button>
+      <button id="theme" class="ghost" type="button" aria-label="Toggle dark mode">◐</button>
+    </div>
   </header>
 
   <section class="card" id="limitsCard" hidden>
@@ -27,6 +31,7 @@
       <span class="badge" id="planBadge"></span>
     </div>
     <div class="meters" id="limits"></div>
+    <div class="extra" id="extra" hidden></div>
   </section>
 
   <section class="hero card">
