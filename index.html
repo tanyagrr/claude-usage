@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Usage</title>
+<meta name="description" content="Token usage across my Claude Code sessions.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='2' y='8' width='3' height='6' rx='1' fill='%232a78d6'/><rect x='6.5' y='4' width='3' height='10' rx='1' fill='%232a78d6'/><rect x='11' y='2' width='3' height='12' rx='1' fill='%232a78d6'/></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="viz-root">
+  <header class="top">
+    <div>
+      <h1>Claude usage</h1>
+      <p class="sub" id="sub">Loading…</p>
+    </div>
+    <button id="theme" class="ghost" type="button" aria-label="Toggle dark mode">◐</button>
+  </header>
+
+  <section class="hero card">
+    <div class="hero-label">Total tokens processed</div>
+    <div class="hero-value" id="hero">–</div>
+    <div class="hero-note" id="heroNote"></div>
+  </section>
+
+  <section class="tiles" id="tiles"></section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Tokens per day</h2>
+        <p class="hint" id="dailyHint">Stacked by model</p>
+      </div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Metric" id="metricSeg">
+          <button type="button" data-v="all" aria-pressed="true">All tokens</button>
+          <button type="button" data-v="out" aria-pressed="false">Output</button>
+        </div>
+        <div class="seg" role="group" aria-label="Time range" id="rangeSeg">
+          <button type="button" data-v="30" aria-pressed="true">30d</button>
+          <button type="button" data-v="90" aria-pressed="false">90d</button>
+          <button type="button" data-v="all" aria-pressed="false">All</button>
+        </div>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="chart" id="daily"></div>
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <h2>Where the tokens go</h2>
+      <p class="hint">Most input is re-read from the prompt cache, which is far cheaper than fresh input.</p>
+      <div id="types"></div>
+    </section>
+    <section class="card">
+      <h2>Models</h2>
+      <p class="hint">Share of API responses</p>
+      <div id="models"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>When I use Claude</h2>
+    <p class="hint" id="heatHint">Responses by weekday and hour</p>
+    <div class="chart" id="heat"></div>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary><h2>Daily table</h2></summary>
+      <div class="table-wrap"><table id="table"></table></div>
+    </details>
+  </section>
+
+  <footer>
+    Aggregated from local <a href="https://claude.com/claude-code">Claude Code</a> transcripts. Counts only; no prompts, code or project names.
+  </footer>
+</main>
+<div id="tip" class="tip" role="tooltip" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>
