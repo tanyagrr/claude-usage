@@ -23,7 +23,7 @@ Unregister-ScheduledTask -TaskName "Claude usage auto-update" -Confirm:$false
 
 `update.ps1` does the same once, by hand. Changes and errors are logged to `auto-update.log` (not committed).
 
-The page reads the newest commit's data through the GitHub API, so it doesn't wait for GitHub Pages to rebuild. It checks again every 5 minutes while open, and the Refresh button checks immediately. Extra transcript folders (e.g. from WSL) can be passed to the collector: `node scripts/collect.mjs \wsl$Ubuntuhomeme.claudeprojects`.
+The page reads the newest commit's data through the GitHub API, so it doesn't wait for GitHub Pages to rebuild. It checks again every 5 minutes while open, and the Refresh button checks immediately. Extra transcript folders (e.g. from WSL) can be passed to the collector: `node scripts/collect.mjs \\wsl$\Ubuntu\home\me\.claude\projects`.
 
 ## Running locally
 
