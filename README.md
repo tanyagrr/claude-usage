@@ -10,7 +10,9 @@ The page (`index.html`, `app.js`, `style.css`) is plain HTML/JS with no build st
 
 ## Plan limits
 
-`data/limits.json` is a snapshot of the plan usage limits (5-hour and weekly windows, extra usage) as shown in the Claude app. Those numbers are not in the local transcripts, so this file is refreshed by asking Claude Code to update it; the page shows how old the snapshot is and marks windows that have reset since.
+`data/limits.json` is a snapshot of the plan usage limits (5-hour and weekly windows, extra usage) as shown in the Claude app. Those numbers aren't in the local transcripts, so Claude itself refreshes them: a Stop hook in `~/.claude/settings.json` runs `scripts/limits-hook.mjs` whenever Claude finishes a reply. If the snapshot is over 15 minutes old, the hook asks Claude to call its `get_usage` tool and save the result with `scripts/save-limits.mjs`; the 5-minute auto-update then publishes it. The page shows how old the snapshot is and marks windows that have reset since.
+
+`scripts/limits.mjs` is an alternative that reads live limits with the local Claude Code CLI login, when that login is valid.
 
 ## Updating
 
