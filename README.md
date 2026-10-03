@@ -14,11 +14,16 @@ The page (`index.html`, `app.js`, `style.css`) is plain HTML/JS with no build st
 
 ## Updating
 
+A Windows scheduled task runs `auto-update.ps1` every 5 minutes while the PC is on. It re-runs the collector and, only if there is new usage, commits `data/` and pushes. Install or remove it with:
+
 ```powershell
-powershell -ExecutionPolicy Bypass -File update.ps1
+powershell -ExecutionPolicy Bypass -File install-auto-update.ps1
+Unregister-ScheduledTask -TaskName "Claude usage auto-update" -Confirm:$false
 ```
 
-This re-runs the collector, commits `data/usage.json` and pushes. Extra transcript folders (e.g. from WSL) can be passed to the collector: `node scripts/collect.mjs \\wsl$\Ubuntu\home\me\.claude\projects`.
+`update.ps1` does the same once, by hand. Changes and errors are logged to `auto-update.log` (not committed).
+
+The page reads the newest commit's data through the GitHub API, so it doesn't wait for GitHub Pages to rebuild. It checks again every 5 minutes while open, and the Refresh button checks immediately. Extra transcript folders (e.g. from WSL) can be passed to the collector: `node scripts/collect.mjs \wsl$Ubuntuhomeme.claudeprojects`.
 
 ## Running locally
 

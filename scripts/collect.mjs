@@ -98,6 +98,7 @@ const data = {
   generatedAt: new Date().toISOString(),
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   range: first ? { first: localDay(first), last: localDay(last) } : null,
+  lastActivity: last ? last.toISOString() : null,
   totals: { ...totals, sessions: sessions.size, activeDays: days.size },
   models: [...models.values()].sort((a, b) => b.out - a.out),
   days: [...days.values()]
@@ -106,6 +107,16 @@ const data = {
   heat,
 };
 
-fs.mkdirSync(path.join(root, "data"), { recursive: true });
-fs.writeFileSync(path.join(root, "data", "usage.json"), JSON.stringify(data, null, 1));
+// Leave the file alone when nothing but the timestamp changed, so scheduled runs
+// only produce a commit when there is new usage.
+const outFile = path.join(root, "data", "usage.json");
+const strip = ({ generatedAt, ...rest }) => JSON.stringify(rest);
+try {
+  if (strip(JSON.parse(fs.readFileSync(outFile, "utf8"))) === strip(data)) {
+    console.log("No new usage.");
+    process.exit(0);
+  }
+} catch {}
+fs.mkdirSync(path.dirname(outFile), { recursive: true });
+fs.writeFileSync(outFile, JSON.stringify(data, null, 1));
 console.log(`Wrote ${messages.size} responses across ${days.size} days, ${sessions.size} sessions.`);

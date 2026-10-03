@@ -59,10 +59,10 @@
   function renderSummary() {
     const t = data.totals;
     const first = parseDay(data.range.first), last = parseDay(data.range.last);
-    const updated = new Date(data.generatedAt);
+    const lastActivity = new Date(data.lastActivity || data.generatedAt);
     $("sub").textContent =
       `${fmtDay(first, { month: "short", day: "numeric", year: "numeric" })} – ${fmtDay(last, { month: "short", day: "numeric", year: "numeric" })} · ` +
-      `updated ${updated.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`;
+      `last activity ${lastActivity.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`;
     $("hero").textContent = compact(total(t));
     $("heroNote").textContent = `${full(total(t))} tokens, ${pct(t.cr / total(t))} of them cache reads`;
 
@@ -355,68 +355,63 @@
     renderTable();
   }
 
-  // ---------- on-demand refresh ----------
-  // The Refresh button rings a doorbell on a public ntfy.sh topic. A helper on my PC
-  // (scripts/helper.mjs) hears it, re-collects usage and limits, pushes them to GitHub,
-  // and replies with the commit sha; the page then loads that exact commit's data.
+  // ---------- refresh ----------
+  // My PC pushes new data to GitHub every 5 minutes. GitHub Pages can lag behind a
+  // push, so the page asks the GitHub API for the newest commit and reads that
+  // commit's data files directly, falling back to the Pages copy.
+  const CHECK_EVERY = 5 * 60_000;
+  let cfg = null, shownSha = null, lastCheck = 0;
   const setStatus = (text) => { $("status").textContent = text; $("status").hidden = !text; };
 
-  function refresh(cfg) {
+  async function latestSha() {
+    const r = await fetch(`https://api.github.com/repos/${cfg.repo}/commits/${cfg.branch}`, { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    const sha = (await r.json()).sha;
+    if (!/^[0-9a-f]{40}$/.test(sha)) throw new Error("bad sha");
+    return sha;
+  }
+
+  async function update() {
+    if (!cfg) return load();
+    lastCheck = Date.now();
+    const sha = await latestSha();
+    if (sha === shownSha) return false;
+    await load(`https://raw.githubusercontent.com/${cfg.repo}/${sha}/`);
+    shownSha = sha;
+    return true;
+  }
+
+  async function onRefreshClick() {
     const btn = $("refresh");
     btn.disabled = true;
     btn.classList.add("spinning");
-    setStatus("Asking my computer for fresh data…");
-    const since = Math.floor(Date.now() / 1000) - 1;
-    const es = new EventSource(`${cfg.relay}/${cfg.topic}/sse?since=${since}`);
-    let acked = false;
-    const finish = (text) => {
-      es.close();
-      clearTimeout(noAck);
-      clearTimeout(noDone);
+    setStatus("Checking for new data…");
+    try {
+      const changed = Date.now() - lastCheck < 10_000 ? false : await update();
+      setStatus(changed ? "Loaded the latest data." : "Already up to date. New usage is published every 5 minutes.");
+    } catch {
+      setStatus("Couldn't check for new data right now. Try again in a minute.");
+    } finally {
       btn.disabled = false;
       btn.classList.remove("spinning");
-      setStatus(text);
-    };
-    const noAck = setTimeout(() => !acked && finish("My computer looks offline right now, so this is the latest saved data."), 12000);
-    const noDone = setTimeout(() => finish("Refresh is taking too long. Showing the latest saved data."), 90000);
-
-    es.onmessage = async (e) => {
-      let body;
-      try { body = JSON.parse(e.data).message || ""; } catch { return; }
-      if (body === "ack") { acked = true; setStatus("Collecting fresh numbers…"); return; }
-      if (body.startsWith("error")) return finish("My computer couldn't refresh the data. Showing the latest saved data.");
-      const m = /^done ([0-9a-f]{40})$/.exec(body);
-      if (!m) return;
-      try {
-        await load(`https://raw.githubusercontent.com/${cfg.repo}/${m[1]}/`);
-        finish("Fresh data loaded.");
-      } catch {
-        finish("Fresh data was saved but couldn't be loaded. Try reloading the page in a minute.");
-      }
-    };
-    let sent = false;
-    es.onopen = () => {
-      if (sent) return; // EventSource reconnects re-fire onopen
-      sent = true;
-      fetch(`${cfg.relay}/${cfg.topic}`, { method: "POST", body: "refresh" })
-        .catch(() => finish("Couldn't reach the refresh service. Showing the latest saved data."));
-    };
+    }
   }
 
   async function main() {
     initTheme();
     bindSeg("metricSeg", "metric");
     bindSeg("rangeSeg", "range");
+    try { cfg = await getJSON("config.json"); } catch {}
     try {
-      await load();
+      await update();
     } catch {
-      $("sub").textContent = "Could not load data/usage.json.";
+      try { await load(); } catch { $("sub").textContent = "Could not load data/usage.json."; }
     }
-    getJSON("config.json").then((cfg) => {
-      if (!cfg.topic) return;
-      $("refresh").hidden = false;
-      $("refresh").addEventListener("click", () => refresh(cfg));
-    }).catch(() => {});
+    $("refresh").hidden = false;
+    $("refresh").addEventListener("click", onRefreshClick);
+    setInterval(() => {
+      if (document.visibilityState === "visible") update().catch(() => {});
+    }, CHECK_EVERY);
     let raf;
     addEventListener("resize", () => {
       if (!data?.range) return;
