@@ -267,6 +267,47 @@
       `<tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody>`;
   }
 
+  // ---------- plan limits ----------
+  function relTime(ms) {
+    const m = Math.round(ms / 60000);
+    if (m < 60) return `${m}m`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h ${m % 60}m`;
+    return `${Math.floor(h / 24)}d ${h % 24}h`;
+  }
+
+  function renderLimits(limits) {
+    if (!limits?.windows?.length) return;
+    const now = Date.now();
+    const captured = new Date(limits.capturedAt);
+    const fmtWhen = (d) => d.toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+    $("limitsCard").hidden = false;
+    $("planBadge").textContent = limits.plan ? `${limits.plan} plan` : "";
+    $("limitsHint").textContent = `Share of each usage limit used · snapshot taken ${now - captured < 60000 ? "just now" : relTime(now - captured) + " ago"} (${fmtWhen(captured)})`;
+    $("limits").innerHTML = limits.windows.map((w) => {
+      const reset = new Date(w.resetsAt);
+      const stale = reset <= now;
+      const p = Math.max(0, Math.min(100, w.percentUsed));
+      const level = p >= 90 ? "crit" : p >= 70 ? "warn" : "";
+      const flag = level === "crit" ? "⛔ At limit" : level === "warn" ? "⚠ Nearing limit" : "";
+      const when = stale
+        ? `Reset at ${fmtWhen(reset)}, after this snapshot`
+        : `Resets in ${relTime(reset - now)} · ${fmtWhen(reset)}`;
+      return `<div class="meter${stale ? " stale" : ""}" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}" aria-label="${w.label}">
+        <div class="row1"><span class="name">${w.label}</span>${flag ? `<span class="flag">${flag}</span>` : ""}</div>
+        <div class="pct">${p}% used</div>
+        <div class="track"><div class="fill ${level}" style="width:${p}%"></div></div>
+        <div class="when">${when}</div>
+      </div>`;
+    }).join("");
+    const x = limits.extraUsage;
+    if (x) {
+      $("limits").insertAdjacentHTML("afterend", `<div class="extra">Extra usage: ${x.enabled
+        ? `on · ${x.currency === "USD" ? "$" : ""}${x.spent} of ${x.currency === "USD" ? "$" : ""}${x.monthlyLimit} monthly cap spent (${x.percentUsed}%)`
+        : "off"}</div>`);
+    }
+  }
+
   // ---------- controls ----------
   function bindSeg(id, keyName) {
     $(id).addEventListener("click", (e) => {
@@ -293,6 +334,10 @@
 
   async function main() {
     initTheme();
+    fetch("data/limits.json", { cache: "no-cache" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then(renderLimits)
+      .catch(() => {});
     try {
       data = await (await fetch("data/usage.json", { cache: "no-cache" })).json();
     } catch {

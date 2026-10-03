@@ -18,6 +18,17 @@
     <button id="theme" class="ghost" type="button" aria-label="Toggle dark mode">◐</button>
   </header>
 
+  <section class="card" id="limitsCard" hidden>
+    <div class="card-head">
+      <div>
+        <h2>Plan limits</h2>
+        <p class="hint" id="limitsHint"></p>
+      </div>
+      <span class="badge" id="planBadge"></span>
+    </div>
+    <div class="meters" id="limits"></div>
+  </section>
+
   <section class="hero card">
     <div class="hero-label">Total tokens processed</div>
     <div class="hero-value" id="hero">–</div>

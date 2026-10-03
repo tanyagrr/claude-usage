@@ -8,6 +8,10 @@ A static dashboard of my Claude Code token usage: totals, tokens per day by mode
 
 The page (`index.html`, `app.js`, `style.css`) is plain HTML/JS with no build step, so it can be hosted anywhere static: GitHub Pages, Vercel, Netlify.
 
+## Plan limits
+
+`data/limits.json` is a snapshot of the plan usage limits (5-hour and weekly windows, extra usage) as shown in the Claude app. Those numbers are not in the local transcripts, so this file is refreshed by asking Claude Code to update it; the page shows how old the snapshot is and marks windows that have reset since.
+
 ## Updating
 
 ```powershell

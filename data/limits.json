@@ -1,0 +1,10 @@
+{
+ "capturedAt": "2026-10-03T22:49:00.000Z",
+ "plan": "Max",
+ "windows": [
+  { "label": "5-hour limit", "percentUsed": 2, "resetsAt": "2026-10-04T03:00:00.400Z" },
+  { "label": "Weekly · all models", "percentUsed": 6, "resetsAt": "2026-10-08T10:00:00.400Z" },
+  { "label": "Weekly · Fable", "percentUsed": 0, "resetsAt": "2026-10-08T10:00:00.000Z" }
+ ],
+ "extraUsage": { "enabled": false, "percentUsed": 0, "spent": "0.00", "monthlyLimit": "20.00", "currency": "USD" }
+}
