@@ -1,30 +1,30 @@
 {
- "generatedAt": "2026-10-04T21:00:03.443Z",
+ "generatedAt": "2026-10-04T21:05:03.448Z",
  "timezone": "Europe/Kiev",
  "range": {
   "first": "2026-04-12",
-  "last": "2026-10-04"
+  "last": "2026-10-05"
  },
- "lastActivity": "2026-10-04T20:59:55.738Z",
+ "lastActivity": "2026-10-04T21:04:45.695Z",
  "totals": {
-  "in": 3318,
-  "cw": 5194502,
-  "cr": 302469090,
-  "out": 2320422,
-  "msgs": 1650,
+  "in": 3380,
+  "cw": 5267389,
+  "cr": 310951169,
+  "out": 2344906,
+  "msgs": 1681,
   "subagentMsgs": 639,
   "sessions": 18,
-  "activeDays": 6
+  "activeDays": 7
  },
  "models": [
   {
    "name": "Opus 5.5",
    "family": "Opus",
-   "in": 3114,
-   "cw": 4868216,
-   "cr": 298341949,
-   "out": 2281398,
-   "msgs": 1554
+   "in": 3176,
+   "cw": 4941103,
+   "cr": 306824028,
+   "out": 2305882,
+   "msgs": 1585
   },
   {
    "name": "Sonnet 4.6",
@@ -146,11 +146,24 @@
      "msgs": 353
     }
    }
+  },
+  {
+   "date": "2026-10-05",
+   "sessions": 2,
+   "byModel": {
+    "Opus 5.5": {
+     "in": 62,
+     "cw": 72887,
+     "cr": 8482079,
+     "out": 24484,
+     "msgs": 31
+    }
+   }
   }
  ],
  "heat": [
   [
-   0,
+   31,
    0,
    0,
    0,
