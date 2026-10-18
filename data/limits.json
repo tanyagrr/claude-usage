@@ -1,16 +1,16 @@
 {
- "capturedAt": "2026-10-18T18:45:09.309Z",
+ "capturedAt": "2026-10-18T19:33:57.385Z",
  "plan": "Max",
  "windows": [
   {
    "label": "5-hour limit",
-   "percentUsed": 19,
-   "resetsAt": "2026-10-18T22:50:00.393Z"
+   "percentUsed": 22,
+   "resetsAt": "2026-10-18T22:49:59.868Z"
   },
   {
    "label": "Weekly · all models",
-   "percentUsed": 20,
-   "resetsAt": "2026-10-22T10:00:00.393Z"
+   "percentUsed": 21,
+   "resetsAt": "2026-10-22T09:59:59.868Z"
   },
   {
    "label": "Weekly · Fable",
