@@ -1,21 +1,21 @@
 {
- "capturedAt": "2026-10-22T07:03:13.604Z",
+ "capturedAt": "2026-10-23T07:57:23.748Z",
  "plan": "Max",
  "windows": [
   {
    "label": "5-hour limit",
-   "percentUsed": 5,
-   "resetsAt": "2026-10-22T10:50:00.169Z"
+   "percentUsed": 0,
+   "resetsAt": "2026-10-23T12:50:00.274Z"
   },
   {
    "label": "Weekly · all models",
-   "percentUsed": 31,
-   "resetsAt": "2026-10-22T10:00:00.169Z"
+   "percentUsed": 1,
+   "resetsAt": "2026-10-29T10:00:00.274Z"
   },
   {
    "label": "Weekly · Fable",
    "percentUsed": 0,
-   "resetsAt": "2026-10-22T10:00:00.000Z"
+   "resetsAt": "2026-10-29T10:00:00.000Z"
   }
  ],
  "extraUsage": {
