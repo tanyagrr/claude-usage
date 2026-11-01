@@ -1,16 +1,16 @@
 {
- "capturedAt": "2026-10-31T10:06:24.176Z",
+ "capturedAt": "2026-11-01T16:19:22.360Z",
  "plan": "Max",
  "windows": [
   {
    "label": "5-hour limit",
-   "percentUsed": 96,
-   "resetsAt": "2026-10-31T13:40:00.250Z"
+   "percentUsed": 8,
+   "resetsAt": "2026-11-01T21:09:59.530Z"
   },
   {
    "label": "Weekly · all models",
-   "percentUsed": 26,
-   "resetsAt": "2026-11-05T10:00:00.250Z"
+   "percentUsed": 28,
+   "resetsAt": "2026-11-05T09:59:59.530Z"
   }
  ],
  "extraUsage": {
